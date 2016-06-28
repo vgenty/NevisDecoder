@@ -20,7 +20,7 @@ endif
 #
 # Define directories to be compile upon a global "make"...
 #
-SUBDIRS := #ADD_NEW_SUBDIR ... do not remove this comment from this line
+SUBDIRS := Algorithm Decoder Encoder EventBuilder FileIO #ADD_NEW_SUBDIR ... do not remove this comment from this line
 
 #####################################################################################
 #
