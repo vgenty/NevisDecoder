@@ -34,7 +34,7 @@ namespace larlite {
     /// I/O mode enum
     enum MODE{
       READ, ///< READ mode
-      WRITE ///< WRITE mode
+      kWRITE ///< kWRITE mode
     };
     
     /// Process status enum
@@ -51,10 +51,10 @@ namespace larlite {
     /// Default destructor
     ~bin_io_handler(){};
     
-    /// Send a word to this method to write out in WRITE mode.
+    /// Send a word to this method to write out in kWRITE mode.
     bool write_word(const unsigned word);
     
-    /// Send an array of words to this method to write out in WRITE mode.
+    /// Send an array of words to this method to write out in kWRITE mode.
     bool write_multi_word(const unsigned *words, const size_t entries);
     
     /// Receive 32-bit word from this method in READ mode.

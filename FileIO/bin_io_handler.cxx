@@ -131,14 +131,14 @@ namespace larlite {
   bool bin_io_handler::write_multi_word(const unsigned* words, const size_t entries){
     
     //
-    // Only function that can assign OPERATING status in WRITE mode.
+    // Only function that can assign OPERATING status in kWRITE mode.
     //
     if(_status!=OPENED && _status!=OPERATING) {
       Message::send(msg::kERROR,__FUNCTION__,"Invalid file I/O status. Cannot write output!");
       return false;
     }
     
-    if(_mode!=WRITE){
+    if(_mode!=kWRITE){
       Message::send(msg::kERROR,__FUNCTION__,
 		    "Not allowed as this is output file stream!");
       return false;
