@@ -18,11 +18,12 @@ sys.argv=[]
 import ROOT
 
 # Load decoder library
-ROOT.gSystem.Load("libDecoder")
+#ROOT.gSystem.Load("libDecoder")
 
 # Load decoder class/namespace
 # from ROOT import *
-from ROOT import larlight as fmwk
+#from ROOT import larlight as fmwk
+from larlite import larlite as ll
 
 #
 # Four lines to just get the output filename from input file name.
@@ -36,28 +37,27 @@ outname = fname[0:fname.rfind('.')] + ".root"
 
 # Decoder algorithm instance ... currently xmit, slow, or trigger
 
-#algo=fmwk.algo_pmt_xmit()
-#algo=fmwk.algo_slow_readout_decoder()
-#algo=fmwk.algo_tpc_xmit()
-#algo=fmwk.algo_trig_decoder()
-#algo=fmwk.algo_tpc_huffman()
-#algo=fmwk.algo_sn_tpc_huffman()
+#algo=ll.algo_pmt_xmit()
+#algo=ll.algo_slow_readout_decoder()
+#algo=ll.algo_tpc_xmit()
+#algo=ll.algo_trig_decoder()
+#algo=ll.algo_tpc_huffman()
+#algo=ll.algo_sn_tpc_huffman()
 
-algo=fmwk.algo_sn_tpc_huffincompressible()
-
+algo=ll.algo_sn_tpc_huffincompressible()
 
 # Set algorithm's back-trace mode with positive int argument (=# words to be backtraced)
 algo.set_backtrace_mode(50)
 
 # Create the decoder instance
-decoder=fmwk.decoder_manager()
+decoder=ll.decoder_manager()
 
 # Attach algorithm to the decoder.
 decoder.set_decoder(algo);
 
 # Set input file format ... ASCII or BINARY
-#decoder.set_format(fmwk.FORMAT.ASCII)
-decoder.set_format(fmwk.FORMAT.BINARY)
+#decoder.set_format(ll.FORMAT.ASCII)
+decoder.set_format(ll.FORMAT.BINARY)
 
 # Set whether or not to ready by block 
 #decoder.set_read_by_block(True)
@@ -81,9 +81,9 @@ decoder.set_output_filename(outname)
 #    - WARNING ... suppress NORMAL information
 #    - ERROR   ... suppress WARNING information
 # For the given info level, all lower level information will be suppressed.
-#decoder.set_verbosity(fmwk.MSG.DEBUG)
-#decoder.set_verbosity(fmwk.MSG.INFO)
-decoder.set_verbosity(fmwk.MSG.NORMAL)
+decoder.set_verbosity(ll.msg.kDEBUG)
+#decoder.set_verbosity(ll.msg.kINFO)
+#decoder.set_verbosity(ll.msg.kNORMAL)
 
 # Set debug mode True if you wish to continue in the decoding event
 # loop with exception handling. This avoids saving an event with
@@ -91,7 +91,7 @@ decoder.set_verbosity(fmwk.MSG.NORMAL)
 # in the decoding event loop. When turned off, the program exits as
 # soon as it encounters any issue.
 
-decoder.debug_mode(False)
+decoder.debug_mode(True)
 #decoder.debug_mode(True)
 
 # Finish configuration. Now run it.

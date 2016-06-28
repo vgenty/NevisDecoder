@@ -1,0 +1,40 @@
+#!/usr/bin/python
+
+import os, sys
+
+files = [ f for f in os.listdir(".") if f.endswith(".cxx") or f.endswith(".h") ]
+
+enum=  [ 'UNDEFINED_WORD',
+         'EVENT_HEADER',  
+         'FEM_HEADER',    
+         'FEM_FIRST_WORD',
+	 'CHANNEL_HEADER',
+	 'CHANNEL_WORD',  
+	 'CHANNEL_LAST_WORD',
+ 	 'FEM_LAST_WORD',    
+	 'EVENT_LAST_WORD',  
+	 'CHANNEL_TIME',     
+	 'CHANNEL_PACKET_LAST_WORD',
+	 'INVALID_WORD',
+	 'EMPTY_WORD',
+	 'DISCRIMINATOR',
+	 'INVALID_CH',
+	 'NORMAL',
+	 'DISC_MAX',
+         'WARNING',
+         'ERROR',
+         'INFO',
+         'DEBUG',
+         'WRITE',
+         'READ']
+
+#    const UInt_t   kINVALID_WORD=data::kINVALID_UINT; ///< Invalid (or initialized) event word
+#    const UInt_t   kEMPTY_WORD=0x0;                  ///< Empty word
+for f in files:
+
+    os.system("sed -i '' -e 's/MSG::/msg::/g' %s" % (f) );
+    os.system("sed -i '' -e 's/DATA::/data::/g' %s" % (f) );
+    os.system("sed -i '' -e 's/FEM::/fem::/g' %s" % (f) );
+
+    for e in enum:
+        os.system("sed -i '' -e 's/{}/{}/g' {}".format(e,'k'+e,f) );

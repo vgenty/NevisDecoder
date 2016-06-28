@@ -18,15 +18,18 @@ elif not os.path.isfile(sys.argv[1]):
 argv=sys.argv
 sys.argv=[]
 
-# Import ROOT
-import ROOT
+
 
 # Load decoder library
-ROOT.gSystem.Load("libDecoder")
+# ROOT.gSystem.Load("libDecoder")
 
 # Load decoder class/namespace
-from ROOT import *
-from ROOT import larlight as fmwk
+#from ROOT import *
+#from ROOT import larlite as fmwk
+
+# Import ROOT
+import ROOT
+from larlite import larlite as fmwk
 
 #
 # Four lines to just get the output filename from input file name.
@@ -47,7 +50,7 @@ outname = fname[0:fname.rfind('.')] + ".root"
 #algo=fmwk.algo_trig_decoder()
 algo=fmwk.algo_tpc_huffman()
 
-algo.set_verbosity(fmwk.MSG.NORMAL)
+algo.set_verbosity(fmwk.msg.kNORMAL)
 
 # Set algorithm's back-trace mode with positive int argument (=# words to be backtraced)
 algo.set_backtrace_mode(1000)
@@ -82,7 +85,7 @@ decoder.set_output_filename(outname)
 #    - ERROR   ... suppress WARNING information
 # For the given info level, all lower level information will be suppressed.
 #decoder.set_verbosity(fmwk.MSG.DEBUG)
-decoder.set_verbosity(fmwk.MSG.INFO)
+decoder.set_verbosity(fmwk.msg.kINFO)
 #decoder.set_verbosity(fmwk.MSG.NORMAL)
 
 # Set debug mode True if you wish to continue in the decoding event

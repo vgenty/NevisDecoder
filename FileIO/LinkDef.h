@@ -9,7 +9,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class larlight::bin_io_handler+;
-#pragma link C++ class larlight::bin_word_search+;
+#pragma link C++ class larlite::bin_io_handler+;
+#pragma link C++ class larlite::bin_word_search+;
 
 #endif

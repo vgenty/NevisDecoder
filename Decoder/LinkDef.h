@@ -10,8 +10,8 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class larlight::decoder_manager+;
-#pragma link C++ class larlight::xmit_event_search+;
+#pragma link C++ class larlite::decoder_manager+;
+#pragma link C++ class larlite::xmit_event_search+;
 
 
 #endif
