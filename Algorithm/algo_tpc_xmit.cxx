@@ -8,18 +8,20 @@ namespace larlite {
   //#########################################
   algo_tpc_xmit::algo_tpc_xmit() 
     : algo_fem_decoder_base(),
-      _ch_data()
+      _ch_data(),
+      _stored(1)
   {
-  //#########################################
+    //#########################################
 
     _algo_fem_last_word = fem::kCHANNEL_LAST_WORD;
+
     reset();
 
   }
 
   //#########################################
   void algo_tpc_xmit::reset() {
-  //#########################################
+    //#########################################
 
     _event_data = 0;
 
@@ -33,7 +35,7 @@ namespace larlite {
   bool algo_tpc_xmit::process_ch_word(const UInt_t word, 
 				      UInt_t &last_word) 
   {
-  //#########################################
+    //#########################################
 
     bool status=true;
 
@@ -183,7 +185,7 @@ namespace larlite {
 
   //#########################################################
   bool algo_tpc_xmit::check_event_quality(){
-  //#########################################################
+    //#########################################################
 
     bool status = true;
 
@@ -207,9 +209,9 @@ namespace larlite {
 
     //if(_checksum != _header_info.checksum)
     if((_checksum & 0xffffff) !=_header_info.checksum){
-	Message::send(msg::kERROR,__FUNCTION__,
-		      Form("Disagreement on checksum: summed=%x, expected=%x",_checksum,_header_info.checksum));
-	status = false;
+      Message::send(msg::kERROR,__FUNCTION__,
+		    Form("Disagreement on checksum: summed=%x, expected=%x",_checksum,_header_info.checksum));
+      status = false;
     }
 
     return status;
@@ -222,10 +224,12 @@ namespace larlite {
   bool algo_tpc_xmit::process_event_header(const UInt_t word, 
 					   UInt_t &last_word) 
   {
-  //#################################################
+    //#################################################
+    Message::send(msg::kINFO,__FUNCTION__,
+		Form("Processing event header with _event_data %x",_event_data));
 
     bool status = true;
-
+    
     if(!_event_data)
 
       _event_data = (event_tpcfifo*)(_storage->get_data<event_tpcfifo>("tpcfifo"));
@@ -235,6 +239,7 @@ namespace larlite {
       // Attempt to store data
 
       status = store_event();
+      
     }else if(last_word != fem::kINVALID_WORD){
 
       Message::send(msg::kERROR,__FUNCTION__,
@@ -254,7 +259,7 @@ namespace larlite {
   bool algo_tpc_xmit::process_fem_last_word(const UInt_t word,
 					    UInt_t &last_word)
   {
-  //#########################################################
+    //#########################################################
 
     // This should not exist in TPC-XMIT
     Message::send(msg::kERROR,__FUNCTION__,
@@ -269,7 +274,7 @@ namespace larlite {
   bool algo_tpc_xmit::process_event_last_word(const UInt_t word,
 					      UInt_t &last_word)
   {  
-  //#########################################################
+    //#########################################################
 
     if(_verbosity[msg::kINFO]){
 
@@ -286,7 +291,7 @@ namespace larlite {
 
   //#########################################################
   void algo_tpc_xmit::clear_event(){
-  //#########################################################
+    //#########################################################
 
     algo_fem_decoder_base::clear_event();
 
@@ -298,7 +303,7 @@ namespace larlite {
 
   //#########################################################
   bool algo_tpc_xmit::store_event(){
-  //#########################################################
+    //#########################################################
 
     bool status = check_event_quality();
 
@@ -310,9 +315,23 @@ namespace larlite {
 	print(msg::kINFO,__FUNCTION__,
 	      Form("Storing event %u with %zu channel entries...",
 		   _header_info.event_number, _event_data->size()));
-
+	
       }
-      
+
+      print(msg::kINFO,__FUNCTION__,
+	    Form("Event: %d \nFrame: %d\nnwords: %d\ncheckum: %d",
+		 _header_info.event_number,
+		 _header_info.event_frame_number,
+		 _header_info.nwords,
+		 _header_info.checksum));
+
+      unsigned y=0;
+      for(const auto& ch_data : *_event_data){
+	print(msg::kINFO,__FUNCTION__,
+	      Form("ch: %d of size %d",y,ch_data.size()));
+	y+=1;
+      }
+		       
       _event_data->set_module_address         ( _header_info.module_address         );
       _event_data->set_module_id              ( _header_info.module_id              );
       _event_data->set_event_number           ( _header_info.event_number           );
@@ -322,7 +341,11 @@ namespace larlite {
       _event_data->set_nwords                 ( _header_info.nwords                 );
       _event_data->set_checksum               ( _header_info.checksum               );
 
+      print(msg::kINFO,__FUNCTION__,
+	    Form("Calling _storage->next_event()"));
+      _storage->set_id(1,1,_stored);
       status = _storage->next_event();
+      _stored+=1;
 
     }else{
 
@@ -342,7 +365,7 @@ namespace larlite {
   bool algo_tpc_xmit::decode_ch_word(const UInt_t word, 
 				     UInt_t &last_word)
   {
-  //#########################################################
+    //#########################################################
 
     bool status = true;
     // Simply append if it is not compressed
@@ -378,45 +401,45 @@ namespace larlite {
       //  -3     000001
 
       /*
-      size_t zero_count     = 0;
-      for(size_t index=0; index<15 && status; ++index){
+	size_t zero_count     = 0;
+	for(size_t index=0; index<15 && status; ++index){
 
 	if( !((data >> index) & 0x1) ) zero_count++;
 	else{
 
-	  switch(zero_count){
+	switch(zero_count){
 
-	  case 0:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) ); break;	  
+	case 0:
+	_ch_data.push_back( (*(_ch_data.rbegin())) ); break;	  
 
-	  case 1:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) -1 ); break;
+	case 1:
+	_ch_data.push_back( (*(_ch_data.rbegin())) -1 ); break;
 
-	  case 2:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) +1 ); break;
+	case 2:
+	_ch_data.push_back( (*(_ch_data.rbegin())) +1 ); break;
 
-	  case 3:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) -2 ); break;
+	case 3:
+	_ch_data.push_back( (*(_ch_data.rbegin())) -2 ); break;
 
-	  case 4:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) +2 ); break;
+	case 4:
+	_ch_data.push_back( (*(_ch_data.rbegin())) +2 ); break;
 
-	  case 5:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) -3 ); break;
+	case 5:
+	_ch_data.push_back( (*(_ch_data.rbegin())) -3 ); break;
 
-	  case 6:
-	    _ch_data.push_back( (*(_ch_data.rbegin())) +3 ); break;
+	case 6:
+	_ch_data.push_back( (*(_ch_data.rbegin())) +3 ); break;
 
-	  default:
-	    Message::send(msg::kERROR,__FUNCTION__,
-			  Form("Encountered unexpected number of zeros (=%zu) in the compressed word %x!",
-			       zero_count,word));
-	    status = false;
-	  };
+	default:
+	Message::send(msg::kERROR,__FUNCTION__,
+	Form("Encountered unexpected number of zeros (=%zu) in the compressed word %x!",
+	zero_count,word));
+	status = false;
+	};
 
-	  zero_count=0;
+	zero_count=0;
 	}
-      }
+	}
       */
 
       size_t zero_count = 0;

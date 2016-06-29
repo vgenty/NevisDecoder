@@ -115,6 +115,7 @@ namespace larlite {
 
     fem::FEM_WORD _algo_fem_last_word;
 
+    unsigned _stored;
   };
 }
 #endif

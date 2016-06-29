@@ -476,7 +476,6 @@ namespace larlite {
 			Form("Storing channel data") );
 	
 	store_ch_data();
-
 	
         // Set the new channel info
         _channel_number_holder = (word & 0x3f);
@@ -675,14 +674,15 @@ namespace larlite {
   void algo_sn_tpc_huffincompressible::store_ch_data() {
     // Save
 
-    Message::send( msg::kINFO, __FUNCTION__, Form("Ch 0x%x, stored %zu adc words", _channel_number_holder, _event_data->size() ) );
+
     _ch_data.set_module_id( _header_info.module_id );
     _ch_data.set_module_address( _header_info.module_address );
     _ch_data.set_channel_number( _channel_number_holder );
     _ch_data.set_readout_frame_number( _readout_frame_number_holder );
+
     _event_data->push_back( _ch_data );
-
-
+    Message::send( msg::kINFO, __FUNCTION__, Form("Ch 0x%x, stored %zu adc words", _channel_number_holder, _ch_data.size() ) );
+    
     // Clear
     _ch_data.clear_data();
     return;

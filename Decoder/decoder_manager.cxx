@@ -103,6 +103,7 @@ namespace larlite {
     UInt_t ctr=0;
     UInt_t index=0;
     time_t watch;
+    
     while(status) {
 
       if(_fin.eof()){
@@ -121,7 +122,8 @@ namespace larlite {
       }
 
       try {
-	status=_decoder->process_word(word);
+	if(ctr) //dirty vic hack fuck me
+	  status=_decoder->process_word(word);
       }catch(::larlite::decode_algo_exception e){
 
 	std::cerr<<e.what()<<std::endl;

@@ -62,8 +62,6 @@ namespace larlite {
 
     }
 
-
-
     //
     // In case of huffman coded data stream, uniquely marked
     // words are only:
@@ -103,6 +101,11 @@ namespace larlite {
 	if(_ch_data.size()) {
 	  _ch_data.set_module_id(_header_info.module_id);
 	  _ch_data.set_module_address(_header_info.module_address);
+	  if (!_event_data) {
+	      Message::send(msg::kWARNING,__FUNCTION__,
+			    Form("_event_data is nill (0x%x)",_event_data));
+	      throw std::exception();
+	    }
 	  _event_data->push_back(_ch_data);
 	  _ch_data.clear_data();
 	}
@@ -201,6 +204,8 @@ namespace larlite {
 					      UInt_t &last_word) 
   {
     bool status = true;
+    Message::send(msg::kINFO,__FUNCTION__,
+		Form("Processing event header with _event_data %x",_event_data));
 
     if(!_event_data)
 
@@ -306,7 +311,9 @@ namespace larlite {
 
 	status = decode_fem_header(_event_header_words);
 
+      Message::send(msg::kINFO,__FUNCTION__,Form("Wow"));
     }
+    
     _ch_last_word_allow = false;
     last_word = word;
 
@@ -316,6 +323,10 @@ namespace larlite {
   bool algo_tpc_huffman::process_event_last_word(const UInt_t word,
 						 UInt_t &last_word) 
   {
+    Message::send(msg::kINFO,__FUNCTION__,
+		  Form(" "));
+
+
     bool status = true;
 
     //
@@ -323,6 +334,7 @@ namespace larlite {
     // Previous word should be the channel last word
     // By this point data should be saved and _header_info should be cleared.
     //
+    
     UInt_t last_word_class = get_word_class(last_word);
 
     if(last_word_class != fem::kCHANNEL_LAST_WORD) {
@@ -454,7 +466,16 @@ namespace larlite {
 	  }
 	  */
 	}
+
+	//vic
+	if(!_event_data)
+	  _event_data = (event_tpcfifo*)(_storage->get_data<event_tpcfifo>("tpcfifo"));
+	
 	// Store
+	Message::send( msg::kDEBUG,
+		       __FUNCTION__,
+		       Form("_event_data ptr %x",_event_data) );
+	
 	_ch_data.set_module_id(_header_info.module_id);
 	_ch_data.set_module_address(_header_info.module_address);
 	_event_data->push_back(_ch_data);
