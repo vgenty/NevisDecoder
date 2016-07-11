@@ -311,7 +311,7 @@ namespace larlite {
 
 	status = decode_fem_header(_event_header_words);
 
-      Message::send(msg::kINFO,__FUNCTION__,Form("Wow"));
+      //Message::send(msg::kINFO,__FUNCTION__,Form("Wow"));
     }
     
     _ch_last_word_allow = false;
