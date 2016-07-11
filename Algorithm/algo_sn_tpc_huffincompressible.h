@@ -59,6 +59,9 @@ namespace larlite {
     UInt_t    _readout_frame_number_holder;
 
     UInt_t _pre_samples;
+
+
+    bool _search_for_next_channel;
     
   };
 

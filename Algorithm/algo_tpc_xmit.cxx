@@ -325,11 +325,11 @@ namespace larlite {
 		 _header_info.nwords,
 		 _header_info.checksum));
 
-      unsigned y=0;
+      //unsigned y=0;
       for(const auto& ch_data : *_event_data){
 	print(msg::kINFO,__FUNCTION__,
-	      Form("ch: %d of size %d",y,ch_data.size()));
-	y+=1;
+	      Form("ch: %d of size %d",ch_data.channel_number(),ch_data.size()));
+	//y+=1;
       }
 		       
       _event_data->set_module_address         ( _header_info.module_address         );

@@ -81,8 +81,8 @@ decoder.set_output_filename(outname)
 #    - WARNING ... suppress NORMAL information
 #    - ERROR   ... suppress WARNING information
 # For the given info level, all lower level information will be suppressed.
-#decoder.set_verbosity(ll.msg.kDEBUG)
-decoder.set_verbosity(ll.msg.kINFO)
+decoder.set_verbosity(ll.msg.kDEBUG)
+#decoder.set_verbosity(ll.msg.kINFO)
 #decoder.set_verbosity(ll.msg.kNORMAL)
 
 # Set debug mode True if you wish to continue in the decoding event

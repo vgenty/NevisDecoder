@@ -6,6 +6,7 @@ namespace larlite {
   {
     _pre_samples = 0;
     _name = "algo_sn_tpc_huffincompressible";
+    _search_for_next_channel = false;
     reset();
   }  
 
@@ -57,6 +58,8 @@ namespace larlite {
   bool algo_sn_tpc_huffincompressible::decode_fem_header(const UInt_t *event_header){
     //#################################################
 
+    Message::send(msg::kINFO,"Decoding FEM header word");
+    
     bool status=true;
     //
     // Get event information
@@ -93,7 +96,6 @@ namespace larlite {
 
     // (7) get checksum
     _header_info.checksum       = ( (((event_header[4]>>16) & 0xfff) + ((event_header[4] & 0xfff)<<12)));
-
 
     // Set the trigger frame to 0 to avoid confusion (any smart guess will only hurt)
     _header_info.fem_trig_frame_number = 0;
@@ -160,6 +162,18 @@ namespace larlite {
 
     }
 
+    //decoder is fucked up, can we make it to the next channel?
+    if ( _search_for_next_channel ) {
+
+      if ( !( word_class == fem::kCHANNEL_HEADER ) ) {
+
+	_last_word = word;
+	return status;
+	
+      }
+
+    }
+    
     //
     // In case of huffman coded SN data stream, uniquely marked
     // words are only:
@@ -171,8 +185,6 @@ namespace larlite {
 
     //current word class
     switch(word_class) {
-
-
       
     case fem::kEVENT_HEADER:
 
@@ -210,7 +222,7 @@ namespace larlite {
 
 	  status = process_fem_header(word,_last_word);
 
-	else{ // it's a huffman compressed word
+	else {
 
 	  UInt_t first_word  = (word & 0xffff);
 	  UInt_t second_word = (word >> 16);
@@ -306,13 +318,20 @@ namespace larlite {
       if(_bt_mode)
 	backtrace();
 
-      clear_event();
 
+      //start vic
+      //clear_event();
+      //end vic
+      
       if(_debug_mode){
 
-	Message::send(msg::kWARNING,__FUNCTION__,"kDEBUG MODE => Continue to next event...");
-
-	_search_for_next_event = true;
+	//start vic
+	//Message::send(msg::kWARNING,__FUNCTION__,"kDEBUG MODE => Continue to next event...");
+	_search_for_next_event   = false;//=true;
+	//end vic
+	
+	Message::send(msg::kWARNING,__FUNCTION__,"kDEBUG MODE => Continue to next channel...");
+	_search_for_next_channel = true;
 
       }
 
@@ -404,10 +423,12 @@ namespace larlite {
       if(_verbosity[msg::kDEBUG])
 	Message::send(msg::kDEBUG,__FUNCTION__,
 		      Form("\t is fem::kCHANNEL_HEADER") );
+
+      _search_for_next_channel = false;
       
       // If this channel is NOT the first channel in a FEM
       if ( last_word_class == fem::kCHANNEL_PACKET_LAST_WORD ) {
-
+	
 	if(_verbosity[msg::kDEBUG])
 	  Message::send(msg::kDEBUG,__FUNCTION__,
 			Form("\t last was fem::kCHANNEL_PACKET_LAST_WORD") );
