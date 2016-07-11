@@ -344,8 +344,10 @@ namespace larlite {
       print(msg::kINFO,__FUNCTION__,
 	    Form("Calling _storage->next_event()"));
       _storage->set_id(1,1,_stored);
-      status = _storage->next_event();
       _stored+=1;
+      
+      status = _storage->next_event();
+
 
     }else{
 

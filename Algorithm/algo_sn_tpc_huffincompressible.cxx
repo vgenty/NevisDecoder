@@ -674,7 +674,10 @@ namespace larlite {
   void algo_sn_tpc_huffincompressible::store_ch_data() {
     // Save
 
+    if(!_event_data)
 
+      _event_data = (event_tpcfifo*)(_storage->get_data<event_tpcfifo>("tpcfifo"));
+    
     _ch_data.set_module_id( _header_info.module_id );
     _ch_data.set_module_address( _header_info.module_address );
     _ch_data.set_channel_number( _channel_number_holder );
