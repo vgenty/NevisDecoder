@@ -5,14 +5,7 @@
 
 namespace larlite {
 
-  enum search {
-    kDont=0,
-    kNextEvent,
-    kNextChannel,
-    kNextPacket,
-  };
-  
- class algo_sn_tpc_huffman : public algo_tpc_huffman {
+  class algo_sn_tpc_huffman : public algo_tpc_huffman {
 
   public:
 
@@ -32,8 +25,6 @@ namespace larlite {
     virtual bool decode_fem_header(const UInt_t *event_header);
 
     virtual bool process_word(const UInt_t word);
-
-   void set_skip(search kUntil){ _kuntil = kUntil; };
     
   protected:  
 
@@ -58,20 +49,17 @@ namespace larlite {
     
     void store_ch_data();
 
+    void set_pre_samples(UInt_t pre_samples) { _pre_samples = pre_samples; }
+    
   protected:
 
     /// These are the same as the ones defined in fifo.h, and used for
     /// the second and later packets which have no channel header in front
-   UShort_t  _channel_number_holder;
-   UInt_t    _readout_frame_number_holder;
-   
-   UInt_t _pre_samples;
-   
-   bool _search_for_next_channel;
-   bool _search_for_next_packet;
-   search _kuntil;
-   
- };
+    UShort_t  _channel_number_holder;
+    UInt_t    _readout_frame_number_holder;
+
+    UInt_t _pre_samples;
+  };
 
 }
 

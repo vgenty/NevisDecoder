@@ -18,13 +18,16 @@
 #pragma link C++ class larlite::algo_tpc_xmit+;
 #pragma link C++ class larlite::algo_pmt_xmit+;
 #pragma link C++ class larlite::algo_tpc_huffman+;
+#pragma link C++ enum larlite::search+;
 #pragma link C++ class larlite::algo_sn_tpc_huffman+;
 
-#pragma link C++ class larlite::algo_debug_sn_tpc_huffman+;
-#pragma link C++ class larlite::algo_sn_tpc_huffincompressible+;
+
+//#pragma link C++ class larlite::algo_debug_sn_tpc_huffman+;
+//#pragma link C++ class larlite::algo_sn_tpc_huffincompressible+;
 
 #pragma link C++ class larlite::algo_trig_decoder+;
 #pragma link C++ class larlite::algo_fem_decoder_base+;
+
 
 
 #endif

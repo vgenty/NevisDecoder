@@ -44,7 +44,9 @@ outname = fname[0:fname.rfind('.')] + ".root"
 #algo=ll.algo_tpc_huffman()
 #algo=ll.algo_sn_tpc_huffman()
 
-algo=ll.algo_sn_tpc_huffincompressible()
+algo=ll.algo_sn_tpc_huffman()
+
+algo.set_skip(ll.kNextPacket)
 
 # Set algorithm's back-trace mode with positive int argument (=# words to be backtraced)
 algo.set_backtrace_mode(50)
