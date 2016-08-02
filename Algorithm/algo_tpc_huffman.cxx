@@ -15,6 +15,7 @@ namespace larlite {
 
     algo_tpc_xmit::reset();
     _ch_last_word_allow=false;
+    
   }
 
   void algo_tpc_huffman::clear_event() {
@@ -74,6 +75,10 @@ namespace larlite {
 
     case fem::kEVENT_HEADER:
 
+      if(_verbosity[msg::kDEBUG])
+	Message::send(msg::kDEBUG, __FUNCTION__, Form("See FEM:kEVENT_HEADER 0x%x",word));
+      
+      
       if( (last_word_class == fem::kEVENT_LAST_WORD && !(_header_info.nwords)) || !(_event_data)) {
 
 	_search_for_next_event = false;
@@ -95,6 +100,9 @@ namespace larlite {
 
     case fem::kFEM_HEADER:
 
+      if(_verbosity[msg::kDEBUG])
+	Message::send(msg::kDEBUG, __FUNCTION__, Form("See FEM:kFEM_HEADER 0x%x",word));
+      
       if(_nwords && _nwords == _header_info.nwords){
 
 	//_nwords++;
@@ -135,6 +143,9 @@ namespace larlite {
 
     case fem::kEVENT_LAST_WORD:
 
+      if(_verbosity[msg::kDEBUG])
+	Message::send(msg::kDEBUG, __FUNCTION__, Form("See FEM:kEVENT_LAST_WORD 0x%x",word));
+      
       //if(last_word_class == fem::kCHANNEL_LAST_WORD){
 
       // Attempt to store data if nwords matches with the expected number
@@ -157,27 +168,17 @@ namespace larlite {
 
     default:
 
+      if(_verbosity[msg::kDEBUG])
+	Message::send(msg::kDEBUG, __FUNCTION__, Form("See: 0x%x",word));
+      
       UInt_t first_word  = (word & 0xffff);
       UInt_t second_word = (word >> 16);
 
       //size_t current_index=_ch_data.size();
       status = process_ch_word(first_word,_last_word);
-      /*
-      printf("%x => ",first_word);
-      for(size_t i=current_index; i<_ch_data.size(); ++i) {
-	std::cout<<_ch_data[i]<< " ";
-      }
-      std::cout<<std::endl;
-      */
-      //current_index=_ch_data.size();
+
       if(status) status = process_ch_word(second_word,_last_word);
-      /*
-      printf("%x => ",second_word);
-      for(size_t i=current_index; i<_ch_data.size(); ++i) {
-	std::cout<<_ch_data[i]<< " ";
-      }
-      std::cout<<std::endl;
-      */
+      
     }
 
     if(!status){
@@ -441,7 +442,7 @@ namespace larlite {
 	status = false;
 
       }
-
+      
       break;
 
     case fem::kCHANNEL_LAST_WORD:{
@@ -455,16 +456,6 @@ namespace larlite {
 	  Message::send(msg::kDEBUG,__FUNCTION__,
 			Form("Finished reading %zu samples for Ch %d",
 			     _ch_data.size(),_ch_data.channel_number()));
-	  /*
-	  if(!(_ch_data.channel_number())) {
-	    int local_ctr=0;
-	    for(auto const& v : _ch_data) {
-	      std::cout<< v << " " <<std::flush;
-	      if(local_ctr && local_ctr%8==0) std::cout<<std::endl;
-	      local_ctr++;
-	    }
-	  }
-	  */
 	}
 
 	//vic
@@ -472,9 +463,10 @@ namespace larlite {
 	  _event_data = (event_tpcfifo*)(_storage->get_data<event_tpcfifo>("tpcfifo"));
 	
 	// Store
-	Message::send( msg::kDEBUG,
-		       __FUNCTION__,
-		       Form("_event_data ptr %x",_event_data) );
+	if(_verbosity[msg::kDEBUG])
+	  Message::send( msg::kDEBUG,
+			 __FUNCTION__,
+			 Form("_event_data ptr %x",_event_data) );
 	
 	_ch_data.set_module_id(_header_info.module_id);
 	_ch_data.set_module_address(_header_info.module_address);
@@ -517,7 +509,9 @@ namespace larlite {
       break;
 
     default:
-      
+      if(_verbosity[msg::kDEBUG])
+	Message::send(msg::kDEBUG,__FUNCTION__,Form("\t is an ADC!"));
+
       status = decode_ch_word(word,last_word);
     }
 

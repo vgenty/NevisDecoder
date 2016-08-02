@@ -18,6 +18,7 @@ namespace larlite {
   fem::FEM_WORD algo_sn_tpc_huffman::get_word_class(const UInt_t word) const {
 
     if( word == 0x0 ) return fem::kUNDEFINED_WORD;
+
     else if( (word & 0xffffffff) == 0xffffffff ) // Unique marker, but with the huffman
       // coding, not unique anymore
       return fem::kEVENT_HEADER;
@@ -27,10 +28,10 @@ namespace larlite {
       return fem::kEVENT_LAST_WORD;
       
     if( (word & 0xffff) == 0xffff )              // Unique marker, but with the huffman
-      // coding, not unique anymore
+                                                 // coding, not unique anymore
       return fem::kFEM_HEADER;
 
-    else if( (word & 0xf000) == 0xf000 )         // Could be ADC word
+    else if( (word & 0xf000) == 0xf000 )         // Could be ADC word (huffman)
       return fem::kFEM_HEADER;
       
     else if( !((word>>15) & 0x1) ) {
@@ -56,7 +57,6 @@ namespace larlite {
       return fem::kUNDEFINED_WORD;
     }
 
-    // fem::FEM_WORD code = algo_tpc_huffman::get_word_class(word); 
   }
 
   //#################################################
@@ -248,11 +248,11 @@ namespace larlite {
     case fem::kEVENT_LAST_WORD:
 
       if(_verbosity[msg::kDEBUG])
+	Message::send(msg::kDEBUG, __FUNCTION__, Form("See FEM:kEVENT_LAST_WORD 0x%x",word));	
 
-	Message::send(msg::kDEBUG, __FUNCTION__, Form("See FEM:kEVENT_LAST_WORD 0x%x",word));
       
       if ( last_word_class == fem::kCHANNEL_PACKET_LAST_WORD ) {
-
+	
         // This is the normal end of event, with some packets in the last channel
 	
         status = process_event_last_word(word,_last_word);
@@ -260,6 +260,7 @@ namespace larlite {
       }
 
       else if ( last_word_class == fem::kCHANNEL_WORD ) {
+
 	Message::send( msg::kWARNING,__FUNCTION__,
 		       Form("Possible frame rollover detected") );
 	
@@ -291,16 +292,24 @@ namespace larlite {
 	// Store
 	
 	// Attempt to store data if nwords matches with the expected number
-	if(status && _nwords == _header_info.nwords){
-	  Message::send( msg::kINFO,__FUNCTION__, Form("STATUS ok... number of words matched to header. word = event last word, nwords = %d, header info nwords = %d, we have _nwords++, checksum, and store_event()" , _nwords, _header_info.nwords) );
-
+	//if(status && _nwords == _header_info.nwords){
+	if(status) {
+	  Message::send( msg::kINFO,__FUNCTION__, Form("Storing. status is OK") );
+	  
+	  if (_nwords != _header_info.nwords ) 
+	    Message::send( msg::kINFO,__FUNCTION__, Form("Number of words NOT matched to header. word = event last word, nwords = %d, header info nwords = %d, we have _nwords++, checksum, and store_event()" , _nwords, _header_info.nwords) );
+	  else
+	    Message::send( msg::kINFO,__FUNCTION__, Form("Number of words is matched to header. word = event last word, nwords = %d, header info nwords = %d, we have _nwords++, checksum, and store_event()" , _nwords, _header_info.nwords) );	    
 	  _nwords++;
 
-	  // is line below correct?
+	  // is this how you increment the checksum?
 	  _checksum += word;
 
 	  _last_word = word;
+
 	  status  = store_event();
+
+	  _checksum = 0;
 	}
 	
       }
@@ -327,11 +336,6 @@ namespace larlite {
       if(_bt_mode)
 	backtrace();
 
-
-      //start vic
-      //clear_event();
-      //end vic
-      
       if(_debug_mode){
 
 	switch( _kuntil ) {
@@ -398,6 +402,8 @@ namespace larlite {
     last_word = word;
     status = store_event();
 
+    _checksum=0;
+    
     return status;
   }
 
@@ -516,8 +522,8 @@ namespace larlite {
 			Form("\t last was fem::kCHANNEL_WORD") );
 	
 	// Store and clear
-	if(_verbosity[msg::kWARNING])
-	  Message::send(msg::kWARNING,__FUNCTION__,
+	if(_verbosity[msg::kDEBUG])
+	  Message::send(msg::kDEBUG,__FUNCTION__,
 			Form("Storing channel data") );
 	
 	store_ch_data();
@@ -528,7 +534,7 @@ namespace larlite {
 
 	if(_verbosity[msg::kWARNING])
           Message::send( msg::kWARNING,__FUNCTION__, 
-                         Form("Frame rollover? New channel number: %d, New frame number: %d", _channel_number_holder, _readout_frame_number_holder ) );
+                         Form("Frame rollover. New channel number: %d, New frame number: %d", _channel_number_holder, _readout_frame_number_holder ) );
 	
 	
       }
@@ -592,9 +598,7 @@ namespace larlite {
 
     default:
       if(_verbosity[msg::kDEBUG])
-
-	Message::send(msg::kDEBUG,__FUNCTION__,
-		      Form("\t is an ADC!"));
+	Message::send(msg::kDEBUG,__FUNCTION__,Form("\t is an ADC!"));
       
       status = decode_ch_word(word,last_word);
 
@@ -632,7 +636,6 @@ namespace larlite {
 
     }
 
-    //if(_checksum != _header_info.checksum)
     if((_checksum & 0xffffff) !=_header_info.checksum){
       
       if( ((_checksum + 0x503f) & 0xffffff) == _header_info.checksum) {
@@ -732,7 +735,8 @@ namespace larlite {
     _ch_data.set_readout_frame_number( _readout_frame_number_holder );
 
     _event_data->push_back( _ch_data );
-    Message::send( msg::kINFO, __FUNCTION__, Form("Ch 0x%x, stored %zu adc words", _channel_number_holder, _ch_data.size() ) );
+    if(_verbosity[msg::kDEBUG])
+      Message::send( msg::kDEBUG, __FUNCTION__, Form("Ch 0x%x, stored %zu adc words", _channel_number_holder, _ch_data.size() ) );
     
     // Clear
     _ch_data.clear_data();

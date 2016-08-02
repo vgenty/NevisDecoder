@@ -316,20 +316,19 @@ namespace larlite {
 	      Form("Storing event %u with %zu channel entries...",
 		   _header_info.event_number, _event_data->size()));
 	
+
+
+	print(msg::kINFO,__FUNCTION__,
+	      Form("Event: %d Frame: %d nwords: %d checkum: %d",
+		   _header_info.event_number,
+		   _header_info.event_frame_number,
+		   _header_info.nwords,
+		   _header_info.checksum));
       }
 
-      print(msg::kINFO,__FUNCTION__,
-	    Form("Event: %d \nFrame: %d\nnwords: %d\ncheckum: %d",
-		 _header_info.event_number,
-		 _header_info.event_frame_number,
-		 _header_info.nwords,
-		 _header_info.checksum));
-
-      //unsigned y=0;
       for(const auto& ch_data : *_event_data){
 	print(msg::kINFO,__FUNCTION__,
 	      Form("ch: %d of size %d",ch_data.channel_number(),ch_data.size()));
-	//y+=1;
       }
 		       
       _event_data->set_module_address         ( _header_info.module_address         );
