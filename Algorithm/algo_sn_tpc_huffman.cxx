@@ -662,7 +662,7 @@ namespace larlite {
   }
 
   bool algo_sn_tpc_huffman::decode_ch_word(const UInt_t word, 
-						      UInt_t &last_word)
+					   UInt_t &last_word)
   {
     //#########################################################
 
@@ -684,22 +684,28 @@ namespace larlite {
     }
     else{
 
-      // Compresed data is in last 15 bit of this word.
+      // Compresed data is in last 15 bits of this word.
       
-      UInt_t data = (word & 0xffff);
+      UInt_t data = (word & 0x7fff);
       
       size_t zero_count = 0;
       bool   non_zero_found = false;
-      for(short index=14; index>=0 && status; --index){
+
+      bool in_padding = true;
+      
+      for(short index=0; index<=14 && status; index++){
+	
+	if( ((data >> index) & 0x1) and in_padding )
+	  { in_padding=false; continue; }
+
+	if ( in_padding )
+	  continue;
 
 	if( !((data >> index) & 0x1) )
-
 	  zero_count += 1;
-
+	
 	else {
-
 	  status = add_huffman_adc(_ch_data,zero_count);
-	  
 	  zero_count = 0;
 	  if(!status) {
 	    Message::send(msg::kERROR,__FUNCTION__,
@@ -707,16 +713,13 @@ namespace larlite {
 	    break;
 	  }
 	}
+	
       }
 
-      if(!status)
-
-	Message::send(msg::kERROR,__FUNCTION__,
-		      Form("Encountered unexpected number of zeros (=%zu) in the compressed word %x!",
-			   zero_count,word));
-
+      //do it one last time for first bits
+      status = add_huffman_adc(_ch_data,zero_count);
     }
-
+    
     return status;
 
   }

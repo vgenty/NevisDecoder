@@ -310,27 +310,26 @@ namespace larlite {
     // Store if condition is satisfied
     if(status) {
       
-      if(_verbosity[msg::kINFO]){
-
-	print(msg::kINFO,__FUNCTION__,
+      if(_verbosity[msg::kDEBUG])
+	print(msg::kDEBUG,__FUNCTION__,
 	      Form("Storing event %u with %zu channel entries...",
 		   _header_info.event_number, _event_data->size()));
 	
 
-
-	print(msg::kINFO,__FUNCTION__,
+      if(_verbosity[msg::kDEBUG])
+	print(msg::kDEBUG,__FUNCTION__,
 	      Form("Event: %d Frame: %d nwords: %d checkum: %d",
 		   _header_info.event_number,
 		   _header_info.event_frame_number,
 		   _header_info.nwords,
 		   _header_info.checksum));
-      }
-
+	
       for(const auto& ch_data : *_event_data){
-	print(msg::kINFO,__FUNCTION__,
-	      Form("ch: %d of size %d",ch_data.channel_number(),ch_data.size()));
+	if(_verbosity[msg::kDEBUG])
+	  print(msg::kDEBUG,__FUNCTION__,
+		Form("ch: %d of size %d",ch_data.channel_number(),ch_data.size()));
       }
-		       
+	
       _event_data->set_module_address         ( _header_info.module_address         );
       _event_data->set_module_id              ( _header_info.module_id              );
       _event_data->set_event_number           ( _header_info.event_number           );
@@ -340,8 +339,10 @@ namespace larlite {
       _event_data->set_nwords                 ( _header_info.nwords                 );
       _event_data->set_checksum               ( _header_info.checksum               );
 
-      print(msg::kINFO,__FUNCTION__,
-	    Form("Calling _storage->next_event()"));
+      if(_verbosity[msg::kDEBUG])
+	print(msg::kDEBUG,__FUNCTION__,
+	      Form("Calling _storage->next_event()"));
+      
       _storage->set_id(1,1,_stored);
       _stored+=1;
       
@@ -386,75 +387,27 @@ namespace larlite {
     }
     else{
 
-      // Compresed data is in last 15 bit of this word.
+      // Compresed data is in last 14 bit of this word.
       UInt_t data = (word & 0x3fff);
-
-      // The compression is based on an extremely simple Huffman encoding.
-      // The Huffman tree used here assigns the following values:
-      //
-      // Value   Code
-      //  +3     0000001
-      //  +2     00001
-      //  +1     001
-      //  +0     1
-      //  -1     01
-      //  -2     0001
-      //  -3     000001
-
-      /*
-	size_t zero_count     = 0;
-	for(size_t index=0; index<15 && status; ++index){
-
-	if( !((data >> index) & 0x1) ) zero_count++;
-	else{
-
-	switch(zero_count){
-
-	case 0:
-	_ch_data.push_back( (*(_ch_data.rbegin())) ); break;	  
-
-	case 1:
-	_ch_data.push_back( (*(_ch_data.rbegin())) -1 ); break;
-
-	case 2:
-	_ch_data.push_back( (*(_ch_data.rbegin())) +1 ); break;
-
-	case 3:
-	_ch_data.push_back( (*(_ch_data.rbegin())) -2 ); break;
-
-	case 4:
-	_ch_data.push_back( (*(_ch_data.rbegin())) +2 ); break;
-
-	case 5:
-	_ch_data.push_back( (*(_ch_data.rbegin())) -3 ); break;
-
-	case 6:
-	_ch_data.push_back( (*(_ch_data.rbegin())) +3 ); break;
-
-	default:
-	Message::send(msg::kERROR,__FUNCTION__,
-	Form("Encountered unexpected number of zeros (=%zu) in the compressed word %x!",
-	zero_count,word));
-	status = false;
-	};
-
-	zero_count=0;
-	}
-	}
-      */
 
       size_t zero_count = 0;
       bool   non_zero_found = false;
-      for(short index=13; index>=0 && status; --index){
+
+      bool in_padding=true;
+
+      for(short index=0; index<=13 && status; index++){
+	
+	if( ((data >> index) & 0x1) and in_padding )
+	  { in_padding=false; continue; }
+
+	if ( in_padding )
+	  continue;
 
 	if( !((data >> index) & 0x1) )
-
 	  zero_count += 1;
-
+	
 	else {
-
 	  status = add_huffman_adc(_ch_data,zero_count);
-	  
 	  zero_count = 0;
 	  if(!status) {
 	    Message::send(msg::kERROR,__FUNCTION__,
@@ -462,7 +415,12 @@ namespace larlite {
 	    break;
 	  }
 	}
+	
       }
+
+      //do it one last time for first bits
+      status = add_huffman_adc(_ch_data,zero_count);
+
 
       if(!status)
 

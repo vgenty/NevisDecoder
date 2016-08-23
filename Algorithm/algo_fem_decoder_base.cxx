@@ -432,22 +432,22 @@ namespace larlite {
       wf.push_back( (*(wf.rbegin())) ); break;	  
 
     case 1:
-      wf.push_back( (*(wf.rbegin())) -1 ); break;
+      wf.push_back( (*(wf.rbegin())) - 1 ); break;
 
     case 2:
-      wf.push_back( (*(wf.rbegin())) +1 ); break;
+      wf.push_back( (*(wf.rbegin())) + 1 ); break;
 
     case 3:
-      wf.push_back( (*(wf.rbegin())) -2 ); break;
+      wf.push_back( (*(wf.rbegin())) - 2 ); break;
 
     case 4:
-      wf.push_back( (*(wf.rbegin())) +2 ); break;
+      wf.push_back( (*(wf.rbegin())) + 2 ); break;
 
     case 5:
-      wf.push_back( (*(wf.rbegin())) -3 ); break;
+      wf.push_back( (*(wf.rbegin())) - 3 ); break;
 
     case 6:
-      wf.push_back( (*(wf.rbegin())) +3 ); break;
+      wf.push_back( (*(wf.rbegin())) + 3 ); break;
 
     default:
 

@@ -1,3 +1,4 @@
+#/usr/bin/python
 #
 # Example decoder script.
 #
@@ -17,7 +18,6 @@ elif not os.path.isfile(sys.argv[1]):
 # otherwise ROOT recognize them as input argument.
 argv=sys.argv
 sys.argv=[]
-
 
 
 # Load decoder library
@@ -50,7 +50,7 @@ outname = fname[0:fname.rfind('.')] + ".root"
 #algo=fmwk.algo_trig_decoder()
 algo=fmwk.algo_tpc_huffman()
 
-algo.set_verbosity(fmwk.msg.kDEBUG)
+algo.set_verbosity(fmwk.msg.kINFO)
 
 # Set algorithm's back-trace mode with positive int argument (=# words to be backtraced)
 algo.set_backtrace_mode(1000)
@@ -85,7 +85,7 @@ decoder.set_output_filename(outname)
 #    - ERROR   ... suppress WARNING information
 # For the given info level, all lower level information will be suppressed.
 #decoder.set_verbosity(fmwk.MSG.DEBUG)
-decoder.set_verbosity(fmwk.msg.kDEBUG)
+decoder.set_verbosity(fmwk.msg.kINFO)
 #decoder.set_verbosity(fmwk.MSG.NORMAL)
 
 # Set debug mode True if you wish to continue in the decoding event

@@ -149,19 +149,27 @@ namespace larlite {
       //if(last_word_class == fem::kCHANNEL_LAST_WORD){
 
       // Attempt to store data if nwords matches with the expected number
-      if(status && _nwords == _header_info.nwords){
-	//_nwords++;
-	_checksum += word;
-	if(_ch_data.size()) {
-	  _ch_data.set_module_id(_header_info.module_id);
-	  _ch_data.set_module_address(_header_info.module_address);
-	  _event_data->push_back(_ch_data);
-	  _ch_data.clear_data();
-	}
-	status = store_event();
+      if(_verbosity[msg::kWARNING])
+	Message::send(msg::kWARNING, __FUNCTION__, Form("Trying to store, status is %d and _nwords is %d _header_info.nwords %d",
+							status,_nwords,_header_info.nwords));
+      if(status && _nwords != _header_info.nwords)
+	if(_verbosity[msg::kERROR])
+	  Message::send(msg::kERROR, __FUNCTION__, Form("Force the issue, store... this... event!!!!"));
+							
+	
+      //_nwords++;
+      _checksum += word;
+      if(_ch_data.size()) {
+	_ch_data.set_module_id(_header_info.module_id);
+	_ch_data.set_module_address(_header_info.module_address);
+	_event_data->push_back(_ch_data);
+	_ch_data.clear_data();
       }
+      status = store_event();
+	//}
 
       status = process_event_last_word(word,_last_word);
+
       break;
 
       //}
@@ -240,8 +248,10 @@ namespace larlite {
 
       Message::send(msg::kERROR,__FUNCTION__,
 		    Form("Disagreement on nwords: counted=%u, expected=%u",_nwords,_header_info.nwords));
-
-      status = false;
+      Message::send(msg::kWARNING,__FUNCTION__,
+		    Form("VIC DOESNT CARE"));
+      //status = false;
+      status = true;
 
     }
 
@@ -262,7 +272,10 @@ namespace larlite {
       else {
 	Message::send(msg::kERROR,__FUNCTION__,
 		      Form("Disagreement on checksum: summed=%x, expected=%x",_checksum,_header_info.checksum));
-	status = false;
+	Message::send(msg::kWARNING,__FUNCTION__,
+		      Form("VIC DOESNT CARE EITHER"));
+	//status = false;
+	status = true;
       }
     }
 
@@ -326,7 +339,7 @@ namespace larlite {
   {
     Message::send(msg::kINFO,__FUNCTION__,
 		  Form(" "));
-
+    
 
     bool status = true;
 
@@ -341,9 +354,12 @@ namespace larlite {
     if(last_word_class != fem::kCHANNEL_LAST_WORD) {
 
       if(_ch_last_word_allow) {
+
 	Message::send(msg::kWARNING,__FUNCTION__,
 		      "Detected last-ch-last-word-missing issue in the previous event FYI...");
+
 	_ch_last_word_allow = false;
+	
       }else {
 	Message::send(msg::kERROR,__FUNCTION__,
 		      Form("Unexpected event last word (%x) with the previous word %x!",word,last_word));
@@ -354,9 +370,16 @@ namespace larlite {
     }else if(_header_info.event_number!=fem::kINVALID_WORD){
 
       Message::send(msg::kERROR,__FUNCTION__,
-		    Form("End of event (%x) ... but buffer holds data for event %d!",word,_header_info.event_number));
+		    Form("End of event (%x) ... but buffer holds data for event %d! Last word class",word,_header_info.event_number));
+      Message::send(msg::kERROR,__FUNCTION__,
+		    Form("last word is %x",last_word));
+      Message::send(msg::kERROR,__FUNCTION__,
+		    Form("with class %d",last_word_class));
+      Message::send(msg::kWARNING,__FUNCTION__,
+		    Form("SO WHAT!"));
 
-      status = false;
+      //status = false;
+      status = true;
 
     }
 
