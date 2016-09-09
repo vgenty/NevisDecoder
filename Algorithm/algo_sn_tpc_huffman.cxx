@@ -36,7 +36,7 @@ namespace larlite {
       
     else if( !((word>>15) & 0x1) ) {
 
-      if ( ( word & 0xf000 ) == 0x1000 )         // Channel time word
+      if ( ( word & 0x4000 ) == 0x4000 )         // Channel time word (14-bit time format)
 	return fem::kCHANNEL_TIME;
 	
       else if( (word & 0xf000) == 0x2000 )       // Uncompressed ADC word
@@ -45,7 +45,7 @@ namespace larlite {
       else if ( ( word & 0xf000 ) == 0x3000 )    // Channel: last word of the packet
 	return fem::kCHANNEL_PACKET_LAST_WORD;
 	
-      else if( (word & 0xf000) == 0x4000 )       // Channel first word
+      else if( (word & 0xf000) == 0x1000 )       // Channel first word
 	return fem::kCHANNEL_HEADER;
       
       else
@@ -447,7 +447,7 @@ namespace larlite {
 
     switch(word_class){
 
-    case fem::kCHANNEL_HEADER: //0x4000
+    case fem::kCHANNEL_HEADER: //0x1000
       
       if(_verbosity[msg::kDEBUG])
 	Message::send(msg::kDEBUG,__FUNCTION__,
@@ -566,9 +566,9 @@ namespace larlite {
       } else {
 	if(_verbosity[msg::kDEBUG])
 	  Message::send(msg::kDEBUG,__FUNCTION__,
-			Form("\t setting readout sample number 0x%x",word & 0xfff));
+			Form("\t setting readout sample number 0x%x",word & 0x3fff));
 	
-        _ch_data.set_readout_sample_number( (word & 0xfff) );
+        _ch_data.set_readout_sample_number( (word & 0x3fff) );
 	
       }
       break;
